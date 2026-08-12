@@ -47,7 +47,7 @@ var STORAGE_KEY = "anubhav-attendance-v1";
 /* ---------- cloud sync (JSONBin.io) ---------- */
 var SYNC = {
   binId: "6a7c52b7f5f4af5e290b7e6a",
-  accessKey: "$2a$10$m.Tg74EFiCaWD4lLpJx6HO/BCcOIhtr9SWl1ionKxxYC1Ab5CgJNS",
+  accessKey: "$2a$10$FsCfW4RkxH5ds4bzw/cGmu6aXjDQXBdc53zs8EazBoQKvH6b0RXty",
   base: "https://api.jsonbin.io/v3/b/"
 };
 var syncStatus = "idle"; // idle | syncing | synced | error | offline
@@ -126,11 +126,21 @@ function pushToCloud() {
     headers: { "Content-Type": "application/json", "X-Access-Key": SYNC.accessKey },
     body: JSON.stringify({ attendance: state.attendance, updatedAt: new Date().toISOString() })
   }).then(function (res) {
-    if (!res.ok) throw new Error("bad status " + res.status);
+    if (!res.ok) {
+      return res.text().then(function (body) {
+        console.error("[sync] push failed:", res.status, body);
+        var err = new Error("http_" + res.status);
+        err.status = res.status;
+        throw err;
+      });
+    }
     syncStatus = "synced";
     renderSyncBadge();
-  }).catch(function () {
-    syncStatus = "error";
+  }).catch(function (e) {
+    console.error("[sync] push error:", e);
+    if (e && (e.status === 401 || e.status === 403)) syncStatus = "auth_error";
+    else if (e && e.status === 404) syncStatus = "not_found";
+    else syncStatus = "error";
     renderSyncBadge();
   });
 }
@@ -140,7 +150,14 @@ function pullFromCloud(showLoading) {
   fetch(SYNC.base + SYNC.binId + "/latest", {
     headers: { "X-Access-Key": SYNC.accessKey }
   }).then(function (res) {
-    if (!res.ok) throw new Error("bad status " + res.status);
+    if (!res.ok) {
+      return res.text().then(function (body) {
+        console.error("[sync] pull failed:", res.status, body);
+        var err = new Error("http_" + res.status);
+        err.status = res.status;
+        throw err;
+      });
+    }
     return res.json();
   }).then(function (data) {
     var record = data && data.record ? data.record : null;
@@ -151,8 +168,11 @@ function pullFromCloud(showLoading) {
     }
     syncStatus = "synced";
     renderSyncBadge();
-  }).catch(function () {
-    syncStatus = "offline";
+  }).catch(function (e) {
+    console.error("[sync] pull error:", e);
+    if (e && (e.status === 401 || e.status === 403)) syncStatus = "auth_error";
+    else if (e && e.status === 404) syncStatus = "not_found";
+    else syncStatus = "offline";
     renderSyncBadge();
   });
 }
@@ -161,11 +181,13 @@ function renderSyncBadge() {
   var el = document.getElementById("syncBadge");
   if (!el) return;
   var map = {
-    idle:    { text: "\\u00b7", color: "#B7AD90" },
-    syncing: { text: "Syncing\\u2026", color: "#8A8372" },
-    synced:  { text: "Synced", color: "#3F6B4C" },
-    error:   { text: "Sync failed \\u2013 saved on this device", color: "#A33636" },
-    offline: { text: "Offline \\u2013 showing last saved copy", color: "#A33636" }
+    idle:       { text: "\\u00b7", color: "#B7AD90" },
+    syncing:    { text: "Syncing\\u2026", color: "#8A8372" },
+    synced:     { text: "Synced", color: "#3F6B4C" },
+    error:      { text: "Sync failed \\u2013 saved on this device", color: "#A33636" },
+    offline:    { text: "Offline \\u2013 showing last saved copy", color: "#A33636" },
+    auth_error: { text: "Sync key rejected \\u2013 check Access Key permissions", color: "#A33636" },
+    not_found:  { text: "Bin not found \\u2013 check Bin ID", color: "#A33636" }
   };
   var m = map[syncStatus] || map.idle;
   el.textContent = m.text;

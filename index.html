@@ -5,325 +5,350 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
 <title>Attendance Register — Anubhav Prasad</title>
 <meta name="theme-color" content="#7A2E2E" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
+  @font-face { font-family: 'system-serif'; src: local('Georgia'); }
   html, body { margin: 0; padding: 0; background: #F2ECDD; }
   * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #26241E;
+  }
+  .serif { font-family: Georgia, 'Times New Roman', serif; }
+  .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+  .att-btn { transition: transform 0.12s ease; cursor: pointer; }
+  .att-btn:hover { transform: translateY(-1px); }
+  .att-btn:active { transform: translateY(0); }
+  ::-webkit-scrollbar { height: 6px; width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #C9C0A8; border-radius: 3px; }
+  a { color: inherit; }
+  button { font: inherit; }
 </style>
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo, useCallback } = React;
+<script>
+(function () {
+"use strict";
 
-/* ---- minimal inline icons (no external icon library needed) ---- */
-const Icon = ({ path, size = 16, color = "currentColor", ...rest }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...rest}>{path}</svg>
-);
-const Check = (p) => <Icon {...p} path={<polyline points="20 6 9 17 4 12" />} />;
-const X = (p) => <Icon {...p} path={<><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>} />;
-const Ban = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></>} />;
-const FileCheck = (p) => <Icon {...p} path={<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="m9 15 2 2 4-4" /></>} />;
-const GraduationCap = (p) => <Icon {...p} path={<><path d="M22 10 12 5 2 10l10 5 10-5Z" /><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" /></>} />;
-const ScrollText = (p) => <Icon {...p} path={<><path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4" /><path d="M19 17V5a2 2 0 0 0-2-2H4" /><path d="M15 8h-5" /><path d="M15 12h-5" /></>} />;
-const ChevronDown = (p) => <Icon {...p} path={<polyline points="6 9 12 15 18 9" />} />;
-const ChevronUp = (p) => <Icon {...p} path={<polyline points="18 15 12 9 6 15" />} />;
-const RotateCcw = (p) => <Icon {...p} path={<><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></>} />;
+var SESSIONS = [{"date":"2026-08-03","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-03_09:00-10:30"},{"date":"2026-08-03","day":"Monday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-03_10:45-12:15"},{"date":"2026-08-03","day":"Monday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-03_13:15-14:45"},{"date":"2026-08-03","day":"Monday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-03_16:45-18:15"},{"date":"2026-08-04","day":"Tuesday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-04_09:00-10:30"},{"date":"2026-08-04","day":"Tuesday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-04_13:15-14:45"},{"date":"2026-08-05","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-05_09:00-10:30"},{"date":"2026-08-05","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-05_10:45-12:15"},{"date":"2026-08-05","day":"Wednesday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-05_13:15-14:45"},{"date":"2026-08-05","day":"Wednesday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-05_16:45-18:15"},{"date":"2026-08-08","day":"Saturday","slot":"09:00-10:30","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-08_09:00-10:30"},{"date":"2026-08-08","day":"Saturday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-08_13:15-14:45"},{"date":"2026-08-08","day":"Saturday","slot":"15:00-16:30","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-08_15:00-16:30"},{"date":"2026-08-08","day":"Saturday","slot":"16:45-18:15","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-08_16:45-18:15"},{"date":"2026-08-09","day":"Sunday","slot":"10:45-12:15","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-09_10:45-12:15"},{"date":"2026-08-09","day":"Sunday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-09_13:15-14:45"},{"date":"2026-08-11","day":"Tuesday","slot":"16:45-18:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-11_16:45-18:15"},{"date":"2026-08-12","day":"Wednesday","slot":"09:00-10:30","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-12_09:00-10:30"},{"date":"2026-08-12","day":"Wednesday","slot":"10:45-12:15","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-12_10:45-12:15"},{"date":"2026-08-12","day":"Wednesday","slot":"15:00-16:30","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-12_15:00-16:30"},{"date":"2026-08-12","day":"Wednesday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-12_16:45-18:15"},{"date":"2026-08-13","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-13_09:00-10:30"},{"date":"2026-08-13","day":"Thursday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-13_10:45-12:15"},{"date":"2026-08-13","day":"Thursday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-13_13:15-14:45"},{"date":"2026-08-14","day":"Friday","slot":"09:00-10:30","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-14_09:00-10:30"},{"date":"2026-08-14","day":"Friday","slot":"10:45-12:15","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-14_10:45-12:15"},{"date":"2026-08-14","day":"Friday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-14_13:15-14:45"},{"date":"2026-08-14","day":"Friday","slot":"15:00-16:30","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-14_15:00-16:30"},{"date":"2026-08-17","day":"Monday","slot":"09:00-10:30","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-17_09:00-10:30"},{"date":"2026-08-17","day":"Monday","slot":"13:15-14:45","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-17_13:15-14:45"},{"date":"2026-08-17","day":"Monday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-17_16:45-18:15"},{"date":"2026-08-18","day":"Tuesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-18_09:00-10:30"},{"date":"2026-08-18","day":"Tuesday","slot":"10:45-12:15","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-18_10:45-12:15"},{"date":"2026-08-18","day":"Tuesday","slot":"13:15-14:45","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-18_13:15-14:45"},{"date":"2026-08-19","day":"Wednesday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-19_09:00-10:30"},{"date":"2026-08-19","day":"Wednesday","slot":"10:45-12:15","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-19_10:45-12:15"},{"date":"2026-08-19","day":"Wednesday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-19_13:15-14:45"},{"date":"2026-08-19","day":"Wednesday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-19_16:45-18:15"},{"date":"2026-08-20","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-20_09:00-10:30"},{"date":"2026-08-20","day":"Thursday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-20_10:45-12:15"},{"date":"2026-08-20","day":"Thursday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-20_13:15-14:45"},{"date":"2026-08-21","day":"Friday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-21_09:00-10:30"},{"date":"2026-08-21","day":"Friday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-21_13:15-14:45"},{"date":"2026-08-21","day":"Friday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-21_16:45-18:15"},{"date":"2026-08-24","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-24_09:00-10:30"},{"date":"2026-08-24","day":"Monday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-24_10:45-12:15"},{"date":"2026-08-24","day":"Monday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-24_16:45-18:15"},{"date":"2026-08-25","day":"Tuesday","slot":"09:00-10:30","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-25_09:00-10:30"},{"date":"2026-08-25","day":"Tuesday","slot":"13:15-14:45","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-25_13:15-14:45"},{"date":"2026-08-27","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-27_09:00-10:30"},{"date":"2026-08-27","day":"Thursday","slot":"10:45-12:15","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-27_10:45-12:15"},{"date":"2026-08-27","day":"Thursday","slot":"16:45-18:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-27_16:45-18:15"},{"date":"2026-08-28","day":"Friday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-28_09:00-10:30"},{"date":"2026-08-28","day":"Friday","slot":"10:45-12:15","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-28_10:45-12:15"},{"date":"2026-08-28","day":"Friday","slot":"13:15-14:45","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-28_13:15-14:45"},{"date":"2026-08-31","day":"Monday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-31_10:45-12:15"},{"date":"2026-08-31","day":"Monday","slot":"13:15-14:45","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-31_13:15-14:45"},{"date":"2026-09-01","day":"Tuesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-01_09:00-10:30"},{"date":"2026-09-01","day":"Tuesday","slot":"10:45-12:15","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-09-01_10:45-12:15"},{"date":"2026-09-01","day":"Tuesday","slot":"13:15-14:45","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-09-01_13:15-14:45"},{"date":"2026-09-02","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-09-02_10:45-12:15"},{"date":"2026-09-02","day":"Wednesday","slot":"15:00-16:30","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-02_15:00-16:30"},{"date":"2026-09-03","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-03_09:00-10:30"},{"date":"2026-09-03","day":"Thursday","slot":"10:45-12:15","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-09-03_10:45-12:15"},{"date":"2026-09-03","day":"Thursday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-09-03_13:15-14:45"},{"date":"2026-09-03","day":"Thursday","slot":"15:00-16:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-03_15:00-16:30"},{"date":"2026-09-04","day":"Friday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-04_10:45-12:15"},{"date":"2026-09-04","day":"Friday","slot":"13:15-14:45","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-09-04_13:15-14:45"},{"date":"2026-09-15","day":"Tuesday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-15_10:45-12:15"},{"date":"2026-09-15","day":"Tuesday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-15_13:15-14:45"},{"date":"2026-09-16","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-16_10:45-12:15"},{"date":"2026-09-16","day":"Wednesday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-16_13:15-14:45"},{"date":"2026-09-17","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-17_09:00-10:30"},{"date":"2026-09-17","day":"Thursday","slot":"10:45-12:15","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-17_10:45-12:15"},{"date":"2026-09-17","day":"Thursday","slot":"16:45-18:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-17_16:45-18:15"},{"date":"2026-09-18","day":"Friday","slot":"09:00-10:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-18_09:00-10:30"},{"date":"2026-09-18","day":"Friday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-18_10:45-12:15"},{"date":"2026-09-21","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-21_09:00-10:30"},{"date":"2026-09-21","day":"Monday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-21_10:45-12:15"},{"date":"2026-09-21","day":"Monday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-21_13:15-14:45"},{"date":"2026-09-22","day":"Tuesday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-22_10:45-12:15"},{"date":"2026-09-22","day":"Tuesday","slot":"13:15-14:45","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-22_13:15-14:45"},{"date":"2026-09-23","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-23_09:00-10:30"},{"date":"2026-09-23","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-23_10:45-12:15"},{"date":"2026-09-24","day":"Thursday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-24_10:45-12:15"},{"date":"2026-09-24","day":"Thursday","slot":"13:15-14:45","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-24_13:15-14:45"},{"date":"2026-09-25","day":"Friday","slot":"09:00-10:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-25_09:00-10:30"},{"date":"2026-09-25","day":"Friday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-25_13:15-14:45"},{"date":"2026-09-28","day":"Monday","slot":"09:00-10:30","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-28_09:00-10:30"},{"date":"2026-09-28","day":"Monday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-28_10:45-12:15"},{"date":"2026-09-28","day":"Monday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-28_13:15-14:45"},{"date":"2026-09-29","day":"Tuesday","slot":"09:00-10:30","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-29_09:00-10:30"},{"date":"2026-09-29","day":"Tuesday","slot":"10:45-12:15","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-29_10:45-12:15"},{"date":"2026-09-30","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-30_09:00-10:30"},{"date":"2026-09-30","day":"Wednesday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-30_10:45-12:15"},{"date":"2026-10-01","day":"Thursday","slot":"09:00-10:30","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-01_09:00-10:30"},{"date":"2026-10-01","day":"Thursday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-01_13:15-14:45"},{"date":"2026-10-01","day":"Thursday","slot":"15:00-16:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-01_15:00-16:30"},{"date":"2026-10-05","day":"Monday","slot":"09:00-10:30","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-05_09:00-10:30"},{"date":"2026-10-05","day":"Monday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-05_10:45-12:15"},{"date":"2026-10-05","day":"Monday","slot":"13:15-14:45","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-05_13:15-14:45"},{"date":"2026-10-06","day":"Tuesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-06_09:00-10:30"},{"date":"2026-10-06","day":"Tuesday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-06_10:45-12:15"},{"date":"2026-10-07","day":"Wednesday","slot":"09:00-10:30","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-07_09:00-10:30"},{"date":"2026-10-07","day":"Wednesday","slot":"10:45-12:15","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-07_10:45-12:15"},{"date":"2026-10-07","day":"Wednesday","slot":"13:15-14:45","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-07_13:15-14:45"},{"date":"2026-10-08","day":"Thursday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-08_13:15-14:45"},{"date":"2026-10-09","day":"Friday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-09_10:45-12:15"},{"date":"2026-10-09","day":"Friday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-09_13:15-14:45"},{"date":"2026-10-10","day":"Saturday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-10_09:00-10:30"},{"date":"2026-10-10","day":"Saturday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-10_10:45-12:15"},{"date":"2026-10-12","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-12_09:00-10:30"},{"date":"2026-10-12","day":"Monday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-12_10:45-12:15"},{"date":"2026-10-13","day":"Tuesday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-13_10:45-12:15"},{"date":"2026-10-13","day":"Tuesday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-13_13:15-14:45"},{"date":"2026-10-14","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-14_09:00-10:30"},{"date":"2026-10-14","day":"Wednesday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-14_13:15-14:45"},{"date":"2026-10-15","day":"Thursday","slot":"09:00-10:30","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-15_09:00-10:30"},{"date":"2026-10-15","day":"Thursday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-15_10:45-12:15"},{"date":"2026-10-15","day":"Thursday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-15_13:15-14:45"},{"date":"2026-10-16","day":"Friday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-16_09:00-10:30"},{"date":"2026-10-21","day":"Wednesday","slot":"09:00-10:30","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-21_09:00-10:30"},{"date":"2026-10-21","day":"Wednesday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-21_10:45-12:15"},{"date":"2026-10-21","day":"Wednesday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-21_13:15-14:45"},{"date":"2026-10-21","day":"Wednesday","slot":"15:00-16:30","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-21_15:00-16:30"}];
 
-const SESSIONS = [{"date":"2026-08-03","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-03_09:00-10:30"},{"date":"2026-08-03","day":"Monday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-03_10:45-12:15"},{"date":"2026-08-03","day":"Monday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-03_13:15-14:45"},{"date":"2026-08-03","day":"Monday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-03_16:45-18:15"},{"date":"2026-08-04","day":"Tuesday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-04_09:00-10:30"},{"date":"2026-08-04","day":"Tuesday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-04_13:15-14:45"},{"date":"2026-08-05","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-05_09:00-10:30"},{"date":"2026-08-05","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-05_10:45-12:15"},{"date":"2026-08-05","day":"Wednesday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-05_13:15-14:45"},{"date":"2026-08-05","day":"Wednesday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-05_16:45-18:15"},{"date":"2026-08-08","day":"Saturday","slot":"09:00-10:30","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-08_09:00-10:30"},{"date":"2026-08-08","day":"Saturday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-08_13:15-14:45"},{"date":"2026-08-08","day":"Saturday","slot":"15:00-16:30","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-08_15:00-16:30"},{"date":"2026-08-08","day":"Saturday","slot":"16:45-18:15","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-08_16:45-18:15"},{"date":"2026-08-09","day":"Sunday","slot":"10:45-12:15","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-09_10:45-12:15"},{"date":"2026-08-09","day":"Sunday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-09_13:15-14:45"},{"date":"2026-08-11","day":"Tuesday","slot":"16:45-18:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-11_16:45-18:15"},{"date":"2026-08-12","day":"Wednesday","slot":"09:00-10:30","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-12_09:00-10:30"},{"date":"2026-08-12","day":"Wednesday","slot":"10:45-12:15","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-12_10:45-12:15"},{"date":"2026-08-12","day":"Wednesday","slot":"15:00-16:30","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-12_15:00-16:30"},{"date":"2026-08-12","day":"Wednesday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-12_16:45-18:15"},{"date":"2026-08-13","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-13_09:00-10:30"},{"date":"2026-08-13","day":"Thursday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-13_10:45-12:15"},{"date":"2026-08-13","day":"Thursday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-13_13:15-14:45"},{"date":"2026-08-14","day":"Friday","slot":"09:00-10:30","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-14_09:00-10:30"},{"date":"2026-08-14","day":"Friday","slot":"10:45-12:15","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-14_10:45-12:15"},{"date":"2026-08-14","day":"Friday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-14_13:15-14:45"},{"date":"2026-08-14","day":"Friday","slot":"15:00-16:30","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-14_15:00-16:30"},{"date":"2026-08-17","day":"Monday","slot":"09:00-10:30","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-17_09:00-10:30"},{"date":"2026-08-17","day":"Monday","slot":"13:15-14:45","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-17_13:15-14:45"},{"date":"2026-08-17","day":"Monday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-17_16:45-18:15"},{"date":"2026-08-18","day":"Tuesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-18_09:00-10:30"},{"date":"2026-08-18","day":"Tuesday","slot":"10:45-12:15","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-18_10:45-12:15"},{"date":"2026-08-18","day":"Tuesday","slot":"13:15-14:45","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-18_13:15-14:45"},{"date":"2026-08-19","day":"Wednesday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-19_09:00-10:30"},{"date":"2026-08-19","day":"Wednesday","slot":"10:45-12:15","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-19_10:45-12:15"},{"date":"2026-08-19","day":"Wednesday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-19_13:15-14:45"},{"date":"2026-08-19","day":"Wednesday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-19_16:45-18:15"},{"date":"2026-08-20","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-20_09:00-10:30"},{"date":"2026-08-20","day":"Thursday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-20_10:45-12:15"},{"date":"2026-08-20","day":"Thursday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-20_13:15-14:45"},{"date":"2026-08-21","day":"Friday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-21_09:00-10:30"},{"date":"2026-08-21","day":"Friday","slot":"13:15-14:45","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-21_13:15-14:45"},{"date":"2026-08-21","day":"Friday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-21_16:45-18:15"},{"date":"2026-08-24","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-24_09:00-10:30"},{"date":"2026-08-24","day":"Monday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-24_10:45-12:15"},{"date":"2026-08-24","day":"Monday","slot":"16:45-18:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-24_16:45-18:15"},{"date":"2026-08-25","day":"Tuesday","slot":"09:00-10:30","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-25_09:00-10:30"},{"date":"2026-08-25","day":"Tuesday","slot":"13:15-14:45","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-25_13:15-14:45"},{"date":"2026-08-27","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-08-27_09:00-10:30"},{"date":"2026-08-27","day":"Thursday","slot":"10:45-12:15","subject":"Python and Statistics for Financial Analysis","professor":"Prof. Amrit Panda","id":"2026-08-27_10:45-12:15"},{"date":"2026-08-27","day":"Thursday","slot":"16:45-18:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-27_16:45-18:15"},{"date":"2026-08-28","day":"Friday","slot":"09:00-10:30","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-08-28_09:00-10:30"},{"date":"2026-08-28","day":"Friday","slot":"10:45-12:15","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-08-28_10:45-12:15"},{"date":"2026-08-28","day":"Friday","slot":"13:15-14:45","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-08-28_13:15-14:45"},{"date":"2026-08-31","day":"Monday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-08-31_10:45-12:15"},{"date":"2026-08-31","day":"Monday","slot":"13:15-14:45","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-08-31_13:15-14:45"},{"date":"2026-09-01","day":"Tuesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-01_09:00-10:30"},{"date":"2026-09-01","day":"Tuesday","slot":"10:45-12:15","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-09-01_10:45-12:15"},{"date":"2026-09-01","day":"Tuesday","slot":"13:15-14:45","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-09-01_13:15-14:45"},{"date":"2026-09-02","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-09-02_10:45-12:15"},{"date":"2026-09-02","day":"Wednesday","slot":"15:00-16:30","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-02_15:00-16:30"},{"date":"2026-09-03","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-03_09:00-10:30"},{"date":"2026-09-03","day":"Thursday","slot":"10:45-12:15","subject":"Content Marketing on Digital Platforms","professor":"Prof. Deepak Ramanan V","id":"2026-09-03_10:45-12:15"},{"date":"2026-09-03","day":"Thursday","slot":"13:15-14:45","subject":"Big Data Analytics for Digital Transformation","professor":"Prof. Manali Chatterjee","id":"2026-09-03_13:15-14:45"},{"date":"2026-09-03","day":"Thursday","slot":"15:00-16:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-03_15:00-16:30"},{"date":"2026-09-04","day":"Friday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-04_10:45-12:15"},{"date":"2026-09-04","day":"Friday","slot":"13:15-14:45","subject":"Digital Product Management","professor":"Prof. Sumit Saxena","id":"2026-09-04_13:15-14:45"},{"date":"2026-09-15","day":"Tuesday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-15_10:45-12:15"},{"date":"2026-09-15","day":"Tuesday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-15_13:15-14:45"},{"date":"2026-09-16","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-16_10:45-12:15"},{"date":"2026-09-16","day":"Wednesday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-16_13:15-14:45"},{"date":"2026-09-17","day":"Thursday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-17_09:00-10:30"},{"date":"2026-09-17","day":"Thursday","slot":"10:45-12:15","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-17_10:45-12:15"},{"date":"2026-09-17","day":"Thursday","slot":"16:45-18:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-17_16:45-18:15"},{"date":"2026-09-18","day":"Friday","slot":"09:00-10:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-18_09:00-10:30"},{"date":"2026-09-18","day":"Friday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-18_10:45-12:15"},{"date":"2026-09-21","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-21_09:00-10:30"},{"date":"2026-09-21","day":"Monday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-21_10:45-12:15"},{"date":"2026-09-21","day":"Monday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-21_13:15-14:45"},{"date":"2026-09-22","day":"Tuesday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-22_10:45-12:15"},{"date":"2026-09-22","day":"Tuesday","slot":"13:15-14:45","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-22_13:15-14:45"},{"date":"2026-09-23","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-23_09:00-10:30"},{"date":"2026-09-23","day":"Wednesday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-23_10:45-12:15"},{"date":"2026-09-24","day":"Thursday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-24_10:45-12:15"},{"date":"2026-09-24","day":"Thursday","slot":"13:15-14:45","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-24_13:15-14:45"},{"date":"2026-09-25","day":"Friday","slot":"09:00-10:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-09-25_09:00-10:30"},{"date":"2026-09-25","day":"Friday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-25_13:15-14:45"},{"date":"2026-09-28","day":"Monday","slot":"09:00-10:30","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-28_09:00-10:30"},{"date":"2026-09-28","day":"Monday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-09-28_10:45-12:15"},{"date":"2026-09-28","day":"Monday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-09-28_13:15-14:45"},{"date":"2026-09-29","day":"Tuesday","slot":"09:00-10:30","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-09-29_09:00-10:30"},{"date":"2026-09-29","day":"Tuesday","slot":"10:45-12:15","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-29_10:45-12:15"},{"date":"2026-09-30","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-09-30_09:00-10:30"},{"date":"2026-09-30","day":"Wednesday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-09-30_10:45-12:15"},{"date":"2026-10-01","day":"Thursday","slot":"09:00-10:30","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-01_09:00-10:30"},{"date":"2026-10-01","day":"Thursday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-01_13:15-14:45"},{"date":"2026-10-01","day":"Thursday","slot":"15:00-16:30","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-01_15:00-16:30"},{"date":"2026-10-05","day":"Monday","slot":"09:00-10:30","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-05_09:00-10:30"},{"date":"2026-10-05","day":"Monday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-05_10:45-12:15"},{"date":"2026-10-05","day":"Monday","slot":"13:15-14:45","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-05_13:15-14:45"},{"date":"2026-10-06","day":"Tuesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-06_09:00-10:30"},{"date":"2026-10-06","day":"Tuesday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-06_10:45-12:15"},{"date":"2026-10-07","day":"Wednesday","slot":"09:00-10:30","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-07_09:00-10:30"},{"date":"2026-10-07","day":"Wednesday","slot":"10:45-12:15","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-07_10:45-12:15"},{"date":"2026-10-07","day":"Wednesday","slot":"13:15-14:45","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-07_13:15-14:45"},{"date":"2026-10-08","day":"Thursday","slot":"13:15-14:45","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-08_13:15-14:45"},{"date":"2026-10-09","day":"Friday","slot":"10:45-12:15","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-09_10:45-12:15"},{"date":"2026-10-09","day":"Friday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-09_13:15-14:45"},{"date":"2026-10-10","day":"Saturday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-10_09:00-10:30"},{"date":"2026-10-10","day":"Saturday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-10_10:45-12:15"},{"date":"2026-10-12","day":"Monday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-12_09:00-10:30"},{"date":"2026-10-12","day":"Monday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-12_10:45-12:15"},{"date":"2026-10-13","day":"Tuesday","slot":"10:45-12:15","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-13_10:45-12:15"},{"date":"2026-10-13","day":"Tuesday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-13_13:15-14:45"},{"date":"2026-10-14","day":"Wednesday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-14_09:00-10:30"},{"date":"2026-10-14","day":"Wednesday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-14_13:15-14:45"},{"date":"2026-10-15","day":"Thursday","slot":"09:00-10:30","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-15_09:00-10:30"},{"date":"2026-10-15","day":"Thursday","slot":"10:45-12:15","subject":"Digital Business Consulting","professor":"Prof. Amit Kumar Srivastava","id":"2026-10-15_10:45-12:15"},{"date":"2026-10-15","day":"Thursday","slot":"13:15-14:45","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-15_13:15-14:45"},{"date":"2026-10-16","day":"Friday","slot":"09:00-10:30","subject":"Investment and Portfolio Management","professor":"Prof. Sabyasachi Mohapatra","id":"2026-10-16_09:00-10:30"},{"date":"2026-10-21","day":"Wednesday","slot":"09:00-10:30","subject":"Search Engine Optimization","professor":"Prof. Amresh Kumar","id":"2026-10-21_09:00-10:30"},{"date":"2026-10-21","day":"Wednesday","slot":"10:45-12:15","subject":"Artificial Intelligence and Machine Learning in Digital Business Management","professor":"Prof. Samant Saurabh","id":"2026-10-21_10:45-12:15"},{"date":"2026-10-21","day":"Wednesday","slot":"13:15-14:45","subject":"Supply Chain Analytics","professor":"Prof. Shashank Kumar","id":"2026-10-21_13:15-14:45"},{"date":"2026-10-21","day":"Wednesday","slot":"15:00-16:30","subject":"Story Telling with Data","professor":"Prof. Madan Lal Yadav","id":"2026-10-21_15:00-16:30"}];
+var STUDENT = { name: "Anubhav Prasad", reg: "DBM/1007/03", program: "DBM Term IV", threshold: 80 };
 
-const STUDENT = { name: "Anubhav Prasad", reg: "DBM/1007/03", program: "DBM Term IV", threshold: 80 };
-
-const STATUS_META = {
-  present: { label: "Present", color: "#3F6B4C" },
-  od: { label: "On Duty", color: "#B08B3D" },
-  absent: { label: "Absent", color: "#A33636" },
-  cancelled: { label: "Cancelled", color: "#8A8372" },
+var STATUS_META = {
+  present:   { label: "Present",   color: "#3F6B4C", glyph: iconCheck },
+  od:        { label: "On Duty",   color: "#B08B3D", glyph: iconFile },
+  absent:    { label: "Absent",    color: "#A33636", glyph: iconX },
+  cancelled: { label: "Cancelled", color: "#8A8372", glyph: iconBan }
 };
+var STATUS_ORDER = ["present", "od", "absent", "cancelled"];
 
-const STORAGE_KEY = "anubhav-attendance-v1";
+var STORAGE_KEY = "anubhav-attendance-v1";
+
+/* ---------- tiny inline icon set (plain SVG strings, no deps) ---------- */
+function svg(size, color, inner) {
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + color +
+    '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
+}
+function iconCheck(s, c) { return svg(s, c, '<polyline points="20 6 9 17 4 12"/>'); }
+function iconX(s, c) { return svg(s, c, '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'); }
+function iconBan(s, c) { return svg(s, c, '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>'); }
+function iconFile(s, c) { return svg(s, c, '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>'); }
+function iconCap(s, c) { return svg(s, c, '<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/>'); }
+function iconScroll(s, c) { return svg(s, c, '<path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M15 8h-5"/><path d="M15 12h-5"/>'); }
+function iconChevDown(s, c) { return svg(s, c, '<polyline points="6 9 12 15 18 9"/>'); }
+function iconChevUp(s, c) { return svg(s, c, '<polyline points="18 15 12 9 6 15"/>'); }
+function iconReset(s, c) { return svg(s, c, '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>'); }
+
+function esc(str) {
+  var d = document.createElement("div");
+  d.innerText = str;
+  return d.innerHTML;
+}
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function fmtDate(iso) {
-  const d = new Date(iso + "T00:00:00");
+  var d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 function fmtMonthYear(iso) {
-  const d = new Date(iso + "T00:00:00");
+  var d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 }
 
-const COURSES = Array.from(new Set(SESSIONS.map((s) => s.subject)));
-const PROF_BY_COURSE = COURSES.reduce((acc, c) => {
-  const s = SESSIONS.find((x) => x.subject === c);
-  acc[c] = s ? s.professor : "";
-  return acc;
-}, {});
+var COURSES = [];
+(function () {
+  var seen = {};
+  SESSIONS.forEach(function (s) { if (!seen[s.subject]) { seen[s.subject] = true; COURSES.push(s.subject); } });
+})();
+var PROF_BY_COURSE = {};
+COURSES.forEach(function (c) {
+  var s = SESSIONS.filter(function (x) { return x.subject === c; })[0];
+  PROF_BY_COURSE[c] = s ? s.professor : "";
+});
 
-function AttendanceRegister() {
-  const [attendance, setAttendance] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch (e) { return {}; }
-  });
-  const [view, setView] = useState("overview");
-  const [courseFilter, setCourseFilter] = useState("all");
-  const [openMonths, setOpenMonths] = useState({});
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
+/* ---------- state ---------- */
+var state = {
+  attendance: {},
+  view: "overview",
+  courseFilter: "all",
+  openMonths: {},
+  showResetConfirm: false
+};
 
-  const persist = useCallback((next) => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch (e) {}
-  }, []);
+try {
+  var raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) state.attendance = JSON.parse(raw);
+} catch (e) {}
 
-  const mark = (id, status) => {
-    setAttendance((prev) => {
-      const next = { ...prev };
-      if (next[id] === status) delete next[id];
-      else next[id] = status;
-      persist(next);
-      return next;
-    });
-  };
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.attendance)); } catch (e) {}
+}
 
-  const resetAll = () => { setAttendance({}); persist({}); setShowResetConfirm(false); };
+function mark(id, status) {
+  if (state.attendance[id] === status) delete state.attendance[id];
+  else state.attendance[id] = status;
+  persist();
+  render();
+}
 
-  const today = todayStr();
+function resetAll() {
+  state.attendance = {};
+  persist();
+  state.showResetConfirm = false;
+  render();
+}
 
-  const courseStats = useMemo(() => {
-    const stats = {};
-    COURSES.forEach((c) => {
-      const sessions = SESSIONS.filter((s) => s.subject === c);
-      let present = 0, od = 0, absent = 0, cancelled = 0, unmarkedPast = 0;
-      sessions.forEach((s) => {
-        const st = attendance[s.id];
-        if (st === "present") present++;
-        else if (st === "od") od++;
-        else if (st === "absent") absent++;
-        else if (st === "cancelled") cancelled++;
-        else if (s.date < today) unmarkedPast++;
-      });
-      const held = present + od + absent;
-      const pct = held > 0 ? ((present + od) / held) * 100 : null;
-      stats[c] = { total: sessions.length, present, od, absent, cancelled, unmarkedPast, held, pct };
-    });
-    return stats;
-  }, [attendance, today]);
-
-  const overall = useMemo(() => {
-    let present = 0, od = 0, absent = 0, unmarkedPast = 0, total = SESSIONS.length;
-    SESSIONS.forEach((s) => {
-      const st = attendance[s.id];
+/* ---------- derived stats ---------- */
+function computeCourseStats(today) {
+  var stats = {};
+  COURSES.forEach(function (c) {
+    var sessions = SESSIONS.filter(function (s) { return s.subject === c; });
+    var present = 0, od = 0, absent = 0, cancelled = 0, unmarkedPast = 0;
+    sessions.forEach(function (s) {
+      var st = state.attendance[s.id];
       if (st === "present") present++;
       else if (st === "od") od++;
       else if (st === "absent") absent++;
-      else if (!st && s.date < today) unmarkedPast++;
+      else if (st === "cancelled") cancelled++;
+      else if (s.date < today) unmarkedPast++;
     });
-    const held = present + od + absent;
-    const pct = held > 0 ? ((present + od) / held) * 100 : null;
-    return { present, od, absent, held, pct, total, unmarkedPast };
-  }, [attendance, today]);
-
-  const sessionsByMonth = useMemo(() => {
-    const filtered = courseFilter === "all" ? SESSIONS : SESSIONS.filter((s) => s.subject === courseFilter);
-    const groups = {};
-    filtered.forEach((s) => {
-      const key = s.date.slice(0, 7);
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(s);
-    });
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
-  }, [courseFilter]);
-
-  useEffect(() => {
-    const key = today.slice(0, 7);
-    setOpenMonths((prev) => (Object.keys(prev).length ? prev : { [key]: true }));
-  }, [today]);
-
-  const toggleMonth = (key) => setOpenMonths((prev) => ({ ...prev, [key]: !prev[key] }));
-
-  const seal = (pct, size = 88) => {
-    if (pct === null) {
-      return (
-        <div style={{ width: size, height: size, borderRadius: "50%", border: "2px dashed #B7AD90", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#8A8372", fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, textAlign: "center", lineHeight: 1.2 }}>NO<br/>DATA</div>
-      );
-    }
-    const color = pct >= STUDENT.threshold ? "#3F6B4C" : "#A33636";
-    return (
-      <div style={{ width: size, height: size, borderRadius: "50%", border: `3px solid ${color}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexShrink: 0, transform: "rotate(-6deg)", position: "relative", color, boxShadow: `inset 0 0 0 3px ${color}22` }}>
-        <div style={{ position: "absolute", inset: 4, borderRadius: "50%", border: `1px solid ${color}55` }} />
-        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 700, fontSize: size > 70 ? 22 : 16 }}>{Math.round(pct)}%</span>
-        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", marginTop: 2 }}>ATTEND</span>
-      </div>
-    );
-  };
-
-  return (
-    <div style={{ background: "#F2ECDD", minHeight: "100vh", fontFamily: "'IBM Plex Sans', sans-serif", color: "#26241E", padding: "0 0 40px 0" }}>
-      <style>{`
-        * { box-sizing: border-box; }
-        .att-btn { transition: transform 0.12s ease, box-shadow 0.12s ease; cursor: pointer; }
-        .att-btn:hover { transform: translateY(-1px); }
-        .att-btn:active { transform: translateY(0); }
-        .course-chip { transition: all 0.15s ease; cursor: pointer; }
-        ::-webkit-scrollbar { height: 6px; width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #C9C0A8; border-radius: 3px; }
-      `}</style>
-
-      <div style={{ borderBottom: "3px double #7A2E2E", padding: "28px 20px 20px", background: "linear-gradient(180deg, #F7F2E4 0%, #F2ECDD 100%)" }}>
-        <div style={{ maxWidth: 880, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-            <ScrollText size={20} color="#7A2E2E" />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.15em", color: "#7A2E2E", fontWeight: 600 }}>
-              REGISTER No. {STUDENT.reg}
-            </span>
-          </div>
-          <h1 style={{ fontFamily: "'Source Serif 4', serif", fontWeight: 700, fontSize: "clamp(28px, 5vw, 40px)", margin: 0, color: "#26241E", letterSpacing: "-0.01em" }}>
-            Attendance Register
-          </h1>
-          <p style={{ margin: "6px 0 0", fontSize: 14, color: "#5B5644" }}>
-            {STUDENT.name} &nbsp;·&nbsp; {STUDENT.program} &nbsp;·&nbsp; {fmtDate(SESSIONS[0].date)} – {fmtDate(SESSIONS[SESSIONS.length - 1].date)}
-          </p>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 20px" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", background: "#FFFDF6", border: "1px solid #E1D8BC", borderRadius: 10, padding: "16px 20px", margin: "20px 0", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-          {seal(overall.pct, 72)}
-          <div style={{ flex: 1, minWidth: 180 }}>
-            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8A8372", marginBottom: 4 }}>Overall standing</div>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 14 }}>
-              {overall.present} present · {overall.od} OD · {overall.absent} absent · {overall.held} of {overall.total} classes held so far
-            </div>
-            {overall.unmarkedPast > 0 && (
-              <div style={{ fontSize: 12.5, color: "#A33636", marginTop: 4 }}>{overall.unmarkedPast} past class{overall.unmarkedPast > 1 ? "es" : ""} still need marking</div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
-          {[["overview", "Course Overview", GraduationCap], ["register", "Full Register", ScrollText]].map(([key, label, IconComp]) => (
-            <button key={key} onClick={() => setView(key)} className="att-btn" style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 8, border: "1px solid", borderColor: view === key ? "#7A2E2E" : "#D8CFB2", background: view === key ? "#7A2E2E" : "#FFFDF6", color: view === key ? "#F7F2E4" : "#5B5644", fontSize: 13.5, fontWeight: 600, fontFamily: "'IBM Plex Sans', sans-serif" }}>
-              <IconComp size={15} /> {label}
-            </button>
-          ))}
-          <button onClick={() => setShowResetConfirm(true)} className="att-btn" style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 8, border: "1px solid #D8CFB2", background: "#FFFDF6", color: "#8A8372", fontSize: 13 }}>
-            <RotateCcw size={14} /> Reset
-          </button>
-        </div>
-
-        {showResetConfirm && (
-          <div style={{ background: "#FBEFE9", border: "1px solid #E3B8AC", borderRadius: 8, padding: "14px 16px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-            <span style={{ fontSize: 13.5, color: "#7A2E2E" }}>Clear every marked attendance record? This can't be undone.</span>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={resetAll} className="att-btn" style={{ padding: "6px 14px", borderRadius: 6, border: "none", background: "#A33636", color: "#fff", fontSize: 13, fontWeight: 600 }}>Yes, clear all</button>
-              <button onClick={() => setShowResetConfirm(false)} className="att-btn" style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #D8CFB2", background: "#FFFDF6", fontSize: 13 }}>Cancel</button>
-            </div>
-          </div>
-        )}
-
-        {view === "overview" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, marginBottom: 20 }}>
-            {COURSES.map((c) => {
-              const s = courseStats[c];
-              return (
-                <div key={c} style={{ background: "#FFFDF6", border: "1px solid #E1D8BC", borderRadius: 12, padding: 16, display: "flex", gap: 14, alignItems: "flex-start" }}>
-                  {seal(s.pct, 64)}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: "'Source Serif 4', serif", fontWeight: 600, fontSize: 15, lineHeight: 1.3, marginBottom: 3 }}>{c}</div>
-                    <div style={{ fontSize: 12, color: "#8A8372", marginBottom: 8 }}>{PROF_BY_COURSE[c]}</div>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "#5B5644" }}>
-                      {s.present}P{s.od ? ` · ${s.od}OD` : ""} · {s.absent}A{s.cancelled ? ` · ${s.cancelled}C` : ""} &nbsp;/&nbsp; {s.total} total
-                    </div>
-                    {s.unmarkedPast > 0 && <div style={{ fontSize: 11.5, color: "#A33636", marginTop: 4 }}>{s.unmarkedPast} unmarked</div>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {view === "register" && (
-          <>
-            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8, marginBottom: 14 }}>
-              <button onClick={() => setCourseFilter("all")} className="course-chip" style={{ padding: "6px 13px", borderRadius: 20, border: "1px solid", borderColor: courseFilter === "all" ? "#7A2E2E" : "#D8CFB2", background: courseFilter === "all" ? "#7A2E2E" : "#FFFDF6", color: courseFilter === "all" ? "#F7F2E4" : "#5B5644", fontSize: 12.5, whiteSpace: "nowrap", fontWeight: 600 }}>All courses</button>
-              {COURSES.map((c) => (
-                <button key={c} onClick={() => setCourseFilter(c)} className="course-chip" style={{ padding: "6px 13px", borderRadius: 20, border: "1px solid", borderColor: courseFilter === c ? "#7A2E2E" : "#D8CFB2", background: courseFilter === c ? "#7A2E2E" : "#FFFDF6", color: courseFilter === c ? "#F7F2E4" : "#5B5644", fontSize: 12.5, whiteSpace: "nowrap", fontWeight: 600 }}>{c}</button>
-              ))}
-            </div>
-
-            {sessionsByMonth.map(([monthKey, sess]) => {
-              const isOpen = !!openMonths[monthKey];
-              return (
-                <div key={monthKey} style={{ marginBottom: 12, border: "1px solid #E1D8BC", borderRadius: 10, background: "#FFFDF6", overflow: "hidden" }}>
-                  <button onClick={() => toggleMonth(monthKey)} className="att-btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left" }}>
-                    <span style={{ fontFamily: "'Source Serif 4', serif", fontWeight: 600, fontSize: 15 }}>{fmtMonthYear(sess[0].date)}</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 8, color: "#8A8372", fontSize: 12 }}>
-                      {sess.length} session{sess.length > 1 ? "s" : ""} {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </span>
-                  </button>
-                  {isOpen && (
-                    <div style={{ borderTop: "1px solid #EDE6D0" }}>
-                      {sess.map((s) => {
-                        const st = attendance[s.id];
-                        const isToday = s.date === today;
-                        return (
-                          <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", borderBottom: "1px solid #F1EBD8", background: isToday ? "#FBF3DF" : "transparent" }}>
-                            <div style={{ width: 92, flexShrink: 0 }}>
-                              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12.5, fontWeight: 600 }}>{fmtDate(s.date)}</div>
-                              <div style={{ fontSize: 10.5, color: "#8A8372" }}>{s.day.slice(0, 3)} · {s.slot}</div>
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 13.5, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.subject}</div>
-                              <div style={{ fontSize: 11.5, color: "#8A8372" }}>{s.professor}</div>
-                            </div>
-                            <div style={{ display: "flex", gap: 4, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: 132 }}>
-                              {["present", "od", "absent", "cancelled"].map((opt) => {
-                                const meta = STATUS_META[opt];
-                                const active = st === opt;
-                                const IconComp = opt === "present" ? Check : opt === "od" ? FileCheck : opt === "absent" ? X : Ban;
-                                return (
-                                  <button key={opt} onClick={() => mark(s.id, opt)} className="att-btn" title={meta.label} style={{ width: 28, height: 28, borderRadius: 7, border: `1.5px solid ${active ? meta.color : "#D8CFB2"}`, background: active ? meta.color : "#FFFDF6", color: active ? "#fff" : "#8A8372", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    <IconComp size={13} />
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </>
-        )}
-
-        <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", marginTop: 24, fontSize: 11.5, color: "#8A8372" }}>
-          {["present", "od", "absent", "cancelled"].map((opt) => {
-            const meta = STATUS_META[opt];
-            const IconComp = opt === "present" ? Check : opt === "od" ? FileCheck : opt === "absent" ? X : Ban;
-            return (
-              <span key={opt} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <IconComp size={12} color={meta.color} /> {meta.label}
-              </span>
-            );
-          })}
-        </div>
-        <div style={{ textAlign: "center", fontSize: 11.5, color: "#B7AD90", marginTop: 10, fontFamily: "'IBM Plex Mono', monospace" }}>
-          {STUDENT.threshold}% minimum attendance · On Duty counts as present · marks saved automatically on this device
-        </div>
-      </div>
-    </div>
-  );
+    var held = present + od + absent;
+    var pct = held > 0 ? ((present + od) / held) * 100 : null;
+    stats[c] = { total: sessions.length, present: present, od: od, absent: absent, cancelled: cancelled, unmarkedPast: unmarkedPast, held: held, pct: pct };
+  });
+  return stats;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<AttendanceRegister />);
+function computeOverall(today) {
+  var present = 0, od = 0, absent = 0, unmarkedPast = 0, total = SESSIONS.length;
+  SESSIONS.forEach(function (s) {
+    var st = state.attendance[s.id];
+    if (st === "present") present++;
+    else if (st === "od") od++;
+    else if (st === "absent") absent++;
+    else if (!st && s.date < today) unmarkedPast++;
+  });
+  var held = present + od + absent;
+  var pct = held > 0 ? ((present + od) / held) * 100 : null;
+  return { present: present, od: od, absent: absent, held: held, pct: pct, total: total, unmarkedPast: unmarkedPast };
+}
+
+function groupByMonth(filterCourse) {
+  var filtered = filterCourse === "all" ? SESSIONS : SESSIONS.filter(function (s) { return s.subject === filterCourse; });
+  var groups = {}, order = [];
+  filtered.forEach(function (s) {
+    var key = s.date.slice(0, 7);
+    if (!groups[key]) { groups[key] = []; order.push(key); }
+    groups[key].push(s);
+  });
+  order.sort();
+  return order.map(function (k) { return [k, groups[k]]; });
+}
+
+/* ---------- render pieces ---------- */
+function sealHtml(pct, size) {
+  size = size || 88;
+  if (pct === null) {
+    return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;border:2px dashed #B7AD90;' +
+      'display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#8A8372;' +
+      'font-family:inherit;font-size:11px;text-align:center;line-height:1.2;" class="mono">NO<br>DATA</div>';
+  }
+  var color = pct >= STUDENT.threshold ? "#3F6B4C" : "#A33636";
+  var fs = size > 70 ? 22 : 16;
+  return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;border:3px solid ' + color +
+    ';display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;' +
+    'transform:rotate(-6deg);position:relative;color:' + color + ';box-shadow:inset 0 0 0 3px ' + color + '22;">' +
+    '<div style="position:absolute;inset:4px;border-radius:50%;border:1px solid ' + color + '55;"></div>' +
+    '<span class="mono" style="font-weight:700;font-size:' + fs + 'px;">' + Math.round(pct) + '%</span>' +
+    '<span class="mono" style="font-size:8px;letter-spacing:0.08em;margin-top:2px;">ATTEND</span></div>';
+}
+
+function render() {
+  var today = todayStr();
+  var overall = computeOverall(today);
+  var courseStats = computeCourseStats(today);
+
+  var html = '';
+
+  // masthead
+  html += '<div style="border-bottom:3px double #7A2E2E;padding:28px 20px 20px;background:linear-gradient(180deg,#F7F2E4 0%,#F2ECDD 100%);">';
+  html += '<div style="max-width:880px;margin:0 auto;">';
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' + iconScroll(20, "#7A2E2E") +
+    '<span class="mono" style="font-size:11px;letter-spacing:0.15em;color:#7A2E2E;font-weight:600;">REGISTER No. ' + esc(STUDENT.reg) + '</span></div>';
+  html += '<h1 class="serif" style="font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;color:#26241E;letter-spacing:-0.01em;">Attendance Register</h1>';
+  html += '<p style="margin:6px 0 0;font-size:14px;color:#5B5644;">' + esc(STUDENT.name) + ' &nbsp;\u00b7&nbsp; ' + esc(STUDENT.program) +
+    ' &nbsp;\u00b7&nbsp; ' + fmtDate(SESSIONS[0].date) + ' \u2013 ' + fmtDate(SESSIONS[SESSIONS.length - 1].date) + '</p>';
+  html += '</div></div>';
+
+  html += '<div style="max-width:880px;margin:0 auto;padding:0 20px;">';
+
+  // overall summary bar
+  html += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFFDF6;border:1px solid #E1D8BC;border-radius:10px;padding:16px 20px;margin:20px 0;box-shadow:0 1px 2px rgba(0,0,0,0.03);">';
+  html += sealHtml(overall.pct, 72);
+  html += '<div style="flex:1;min-width:180px;">';
+  html += '<div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#8A8372;margin-bottom:4px;">Overall standing</div>';
+  html += '<div class="mono" style="font-size:14px;">' + overall.present + ' present \u00b7 ' + overall.od + ' OD \u00b7 ' + overall.absent +
+    ' absent \u00b7 ' + overall.held + ' of ' + overall.total + ' classes held so far</div>';
+  if (overall.unmarkedPast > 0) {
+    html += '<div style="font-size:12.5px;color:#A33636;margin-top:4px;">' + overall.unmarkedPast + ' past class' + (overall.unmarkedPast > 1 ? "es" : "") + ' still need marking</div>';
+  }
+  html += '</div></div>';
+
+  // tabs
+  html += '<div style="display:flex;gap:8px;margin-bottom:18px;">';
+  [["overview", "Course Overview", iconCap], ["register", "Full Register", iconScroll]].forEach(function (t) {
+    var active = state.view === t[0];
+    html += '<button class="att-btn" data-view="' + t[0] + '" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;' +
+      'border:1px solid ' + (active ? "#7A2E2E" : "#D8CFB2") + ';background:' + (active ? "#7A2E2E" : "#FFFDF6") +
+      ';color:' + (active ? "#F7F2E4" : "#5B5644") + ';font-size:13.5px;font-weight:600;">' + t[2](15, active ? "#F7F2E4" : "#5B5644") + ' ' + t[1] + '</button>';
+  });
+  html += '<button class="att-btn" id="resetBtn" style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;' +
+    'border:1px solid #D8CFB2;background:#FFFDF6;color:#8A8372;font-size:13px;">' + iconReset(14, "#8A8372") + ' Reset</button>';
+  html += '</div>';
+
+  if (state.showResetConfirm) {
+    html += '<div style="background:#FBEFE9;border:1px solid #E3B8AC;border-radius:8px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">';
+    html += '<span style="font-size:13.5px;color:#7A2E2E;">Clear every marked attendance record? This can\'t be undone.</span>';
+    html += '<div style="display:flex;gap:8px;">';
+    html += '<button class="att-btn" id="confirmResetBtn" style="padding:6px 14px;border-radius:6px;border:none;background:#A33636;color:#fff;font-size:13px;font-weight:600;">Yes, clear all</button>';
+    html += '<button class="att-btn" id="cancelResetBtn" style="padding:6px 14px;border-radius:6px;border:1px solid #D8CFB2;background:#FFFDF6;font-size:13px;">Cancel</button>';
+    html += '</div></div>';
+  }
+
+  if (state.view === "overview") {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:20px;">';
+    COURSES.forEach(function (c) {
+      var s = courseStats[c];
+      html += '<div style="background:#FFFDF6;border:1px solid #E1D8BC;border-radius:12px;padding:16px;display:flex;gap:14px;align-items:flex-start;">';
+      html += sealHtml(s.pct, 64);
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div class="serif" style="font-weight:600;font-size:15px;line-height:1.3;margin-bottom:3px;">' + esc(c) + '</div>';
+      html += '<div style="font-size:12px;color:#8A8372;margin-bottom:8px;">' + esc(PROF_BY_COURSE[c]) + '</div>';
+      html += '<div class="mono" style="font-size:12px;color:#5B5644;">' + s.present + 'P' + (s.od ? ' \u00b7 ' + s.od + 'OD' : '') +
+        ' \u00b7 ' + s.absent + 'A' + (s.cancelled ? ' \u00b7 ' + s.cancelled + 'C' : '') + ' &nbsp;/&nbsp; ' + s.total + ' total</div>';
+      if (s.unmarkedPast > 0) html += '<div style="font-size:11.5px;color:#A33636;margin-top:4px;">' + s.unmarkedPast + ' unmarked</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  if (state.view === "register") {
+    html += '<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;">';
+    var allActive = state.courseFilter === "all";
+    html += '<button class="att-btn course-chip" data-course="all" style="padding:6px 13px;border-radius:20px;border:1px solid ' + (allActive ? "#7A2E2E" : "#D8CFB2") +
+      ';background:' + (allActive ? "#7A2E2E" : "#FFFDF6") + ';color:' + (allActive ? "#F7F2E4" : "#5B5644") + ';font-size:12.5px;white-space:nowrap;font-weight:600;">All courses</button>';
+    COURSES.forEach(function (c) {
+      var active = state.courseFilter === c;
+      html += '<button class="att-btn course-chip" data-course="' + esc(c) + '" style="padding:6px 13px;border-radius:20px;border:1px solid ' + (active ? "#7A2E2E" : "#D8CFB2") +
+        ';background:' + (active ? "#7A2E2E" : "#FFFDF6") + ';color:' + (active ? "#F7F2E4" : "#5B5644") + ';font-size:12.5px;white-space:nowrap;font-weight:600;">' + esc(c) + '</button>';
+    });
+    html += '</div>';
+
+    var groups = groupByMonth(state.courseFilter);
+    groups.forEach(function (g) {
+      var monthKey = g[0], sess = g[1];
+      var isOpen = !!state.openMonths[monthKey];
+      html += '<div style="margin-bottom:12px;border:1px solid #E1D8BC;border-radius:10px;background:#FFFDF6;overflow:hidden;">';
+      html += '<button class="att-btn month-toggle" data-month="' + monthKey + '" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:transparent;border:none;text-align:left;">';
+      html += '<span class="serif" style="font-weight:600;font-size:15px;">' + fmtMonthYear(sess[0].date) + '</span>';
+      html += '<span style="display:flex;align-items:center;gap:8px;color:#8A8372;font-size:12px;">' + sess.length + ' session' + (sess.length > 1 ? "s" : "") + ' ' +
+        (isOpen ? iconChevUp(16, "#8A8372") : iconChevDown(16, "#8A8372")) + '</span>';
+      html += '</button>';
+      if (isOpen) {
+        html += '<div style="border-top:1px solid #EDE6D0;">';
+        sess.forEach(function (s) {
+          var st = state.attendance[s.id];
+          var isToday = s.date === today;
+          html += '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #F1EBD8;background:' + (isToday ? "#FBF3DF" : "transparent") + ';">';
+          html += '<div style="width:92px;flex-shrink:0;"><div class="mono" style="font-size:12.5px;font-weight:600;">' + fmtDate(s.date) + '</div>' +
+            '<div style="font-size:10.5px;color:#8A8372;">' + s.day.slice(0, 3) + ' \u00b7 ' + s.slot + '</div></div>';
+          html += '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(s.subject) + '</div>' +
+            '<div style="font-size:11.5px;color:#8A8372;">' + esc(s.professor) + '</div></div>';
+          html += '<div style="display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:132px;">';
+          STATUS_ORDER.forEach(function (opt) {
+            var meta = STATUS_META[opt];
+            var active = st === opt;
+            html += '<button class="att-btn mark-btn" data-id="' + s.id + '" data-status="' + opt + '" title="' + meta.label + '" style="width:28px;height:28px;border-radius:7px;' +
+              'border:1.5px solid ' + (active ? meta.color : "#D8CFB2") + ';background:' + (active ? meta.color : "#FFFDF6") +
+              ';display:flex;align-items:center;justify-content:center;">' + meta.glyph(13, active ? "#fff" : "#8A8372") + '</button>';
+          });
+          html += '</div></div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+  }
+
+  // legend + footer
+  html += '<div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:24px;font-size:11.5px;color:#8A8372;">';
+  STATUS_ORDER.forEach(function (opt) {
+    var meta = STATUS_META[opt];
+    html += '<span style="display:flex;align-items:center;gap:5px;">' + meta.glyph(12, meta.color) + ' ' + meta.label + '</span>';
+  });
+  html += '</div>';
+  html += '<div class="mono" style="text-align:center;font-size:11.5px;color:#B7AD90;margin-top:10px;">' +
+    STUDENT.threshold + '% minimum attendance \u00b7 On Duty counts as present \u00b7 marks saved automatically on this device</div>';
+
+  html += '</div>'; // max-width wrapper
+
+  document.getElementById("root").innerHTML = html;
+  attachHandlers();
+}
+
+function attachHandlers() {
+  var root = document.getElementById("root");
+  root.querySelectorAll("[data-view]").forEach(function (btn) {
+    btn.addEventListener("click", function () { state.view = btn.getAttribute("data-view"); render(); });
+  });
+  var resetBtn = document.getElementById("resetBtn");
+  if (resetBtn) resetBtn.addEventListener("click", function () { state.showResetConfirm = true; render(); });
+  var confirmResetBtn = document.getElementById("confirmResetBtn");
+  if (confirmResetBtn) confirmResetBtn.addEventListener("click", resetAll);
+  var cancelResetBtn = document.getElementById("cancelResetBtn");
+  if (cancelResetBtn) cancelResetBtn.addEventListener("click", function () { state.showResetConfirm = false; render(); });
+  root.querySelectorAll(".course-chip").forEach(function (btn) {
+    btn.addEventListener("click", function () { state.courseFilter = btn.getAttribute("data-course"); render(); });
+  });
+  root.querySelectorAll(".month-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var k = btn.getAttribute("data-month");
+      state.openMonths[k] = !state.openMonths[k];
+      render();
+    });
+  });
+  root.querySelectorAll(".mark-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      mark(btn.getAttribute("data-id"), btn.getAttribute("data-status"));
+    });
+  });
+}
+
+// default-open current month
+state.openMonths[todayStr().slice(0, 7)] = true;
+
+render();
+})();
 </script>
 </body>
 </html>

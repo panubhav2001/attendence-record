@@ -44,6 +44,15 @@ var STATUS_ORDER = ["present", "od", "absent", "cancelled"];
 
 var STORAGE_KEY = "anubhav-attendance-v1";
 
+/* ---------- cloud sync (JSONBin.io) ---------- */
+var SYNC = {
+  binId: "6a7c52b7f5f4af5e290b7e6a",
+  accessKey: "$2a$10$m.Tg74EFiCaWD4lLpJx6HO/BCcOIhtr9SWl1ionKxxYC1Ab5CgJNS",
+  base: "https://api.jsonbin.io/v3/b/"
+};
+var syncStatus = "idle"; // idle | syncing | synced | error | offline
+var syncTimer = null;
+
 /* ---------- tiny inline icon set (plain SVG strings, no deps) ---------- */
 function svg(size, color, inner) {
   return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + color +
@@ -104,11 +113,71 @@ function persist() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.attendance)); } catch (e) {}
 }
 
+function queueCloudSync() {
+  syncStatus = "syncing";
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushToCloud, 700);
+  renderSyncBadge();
+}
+
+function pushToCloud() {
+  fetch(SYNC.base + SYNC.binId, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", "X-Access-Key": SYNC.accessKey },
+    body: JSON.stringify({ attendance: state.attendance, updatedAt: new Date().toISOString() })
+  }).then(function (res) {
+    if (!res.ok) throw new Error("bad status " + res.status);
+    syncStatus = "synced";
+    renderSyncBadge();
+  }).catch(function () {
+    syncStatus = "error";
+    renderSyncBadge();
+  });
+}
+
+function pullFromCloud(showLoading) {
+  if (showLoading) { syncStatus = "syncing"; renderSyncBadge(); }
+  fetch(SYNC.base + SYNC.binId + "/latest", {
+    headers: { "X-Access-Key": SYNC.accessKey }
+  }).then(function (res) {
+    if (!res.ok) throw new Error("bad status " + res.status);
+    return res.json();
+  }).then(function (data) {
+    var record = data && data.record ? data.record : null;
+    if (record && record.attendance) {
+      state.attendance = record.attendance;
+      persist();
+      render();
+    }
+    syncStatus = "synced";
+    renderSyncBadge();
+  }).catch(function () {
+    syncStatus = "offline";
+    renderSyncBadge();
+  });
+}
+
+function renderSyncBadge() {
+  var el = document.getElementById("syncBadge");
+  if (!el) return;
+  var map = {
+    idle:    { text: "\\u00b7", color: "#B7AD90" },
+    syncing: { text: "Syncing\\u2026", color: "#8A8372" },
+    synced:  { text: "Synced", color: "#3F6B4C" },
+    error:   { text: "Sync failed \\u2013 saved on this device", color: "#A33636" },
+    offline: { text: "Offline \\u2013 showing last saved copy", color: "#A33636" }
+  };
+  var m = map[syncStatus] || map.idle;
+  el.textContent = m.text;
+  el.style.color = m.color;
+}
+
 function mark(id, status) {
   if (state.attendance[id] === status) delete state.attendance[id];
   else state.attendance[id] = status;
   persist();
   render();
+  queueCloudSync();
 }
 
 function resetAll() {
@@ -116,6 +185,7 @@ function resetAll() {
   persist();
   state.showResetConfirm = false;
   render();
+  queueCloudSync();
 }
 
 /* ---------- derived stats ---------- */
@@ -206,7 +276,12 @@ function render() {
   html += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFFDF6;border:1px solid #E1D8BC;border-radius:10px;padding:16px 20px;margin:20px 0;box-shadow:0 1px 2px rgba(0,0,0,0.03);">';
   html += sealHtml(overall.pct, 72);
   html += '<div style="flex:1;min-width:180px;">';
-  html += '<div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#8A8372;margin-bottom:4px;">Overall standing</div>';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">';
+  html += '<span style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#8A8372;">Overall standing</span>';
+  html += '<span style="display:flex;align-items:center;gap:8px;">' +
+    '<span id="syncBadge" class="mono" style="font-size:10.5px;"></span>' +
+    '<button class="att-btn" id="refreshBtn" title="Pull latest from other devices" style="border:1px solid #D8CFB2;background:#FFFDF6;border-radius:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">' + iconReset(12, "#8A8372") + '</button></span>';
+  html += '</div>';
   html += '<div class="mono" style="font-size:14px;">' + overall.present + ' present \u00b7 ' + overall.od + ' OD \u00b7 ' + overall.absent +
     ' absent \u00b7 ' + overall.held + ' of ' + overall.total + ' classes held so far</div>';
   if (overall.unmarkedPast > 0) {
@@ -323,6 +398,9 @@ function attachHandlers() {
   });
   var resetBtn = document.getElementById("resetBtn");
   if (resetBtn) resetBtn.addEventListener("click", function () { state.showResetConfirm = true; render(); });
+  var refreshBtn = document.getElementById("refreshBtn");
+  if (refreshBtn) refreshBtn.addEventListener("click", function () { pullFromCloud(true); });
+  renderSyncBadge();
   var confirmResetBtn = document.getElementById("confirmResetBtn");
   if (confirmResetBtn) confirmResetBtn.addEventListener("click", resetAll);
   var cancelResetBtn = document.getElementById("cancelResetBtn");
@@ -347,7 +425,13 @@ function attachHandlers() {
 // default-open current month
 state.openMonths[todayStr().slice(0, 7)] = true;
 
-render();
+render(); // fast paint from local cache
+pullFromCloud(true); // then reconcile with the cloud copy
+
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible") pullFromCloud(false);
+});
+window.addEventListener("focus", function () { pullFromCloud(false); });
 })();
 </script>
 </body>

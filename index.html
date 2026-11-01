@@ -4,24 +4,28 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
 <title>Attendance Register — Anubhav Prasad</title>
-<meta name="theme-color" content="#7A2E2E" />
+<meta name="theme-color" content="#FFFFFF" />
 <style>
   @font-face { font-family: 'system-serif'; src: local('Georgia'); }
-  html, body { margin: 0; padding: 0; background: #F2ECDD; }
+  html, body { margin: 0; padding: 0; background: #FFFFFF; }
   * { box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #26241E;
+    color: #1B2033;
   }
-  .serif { font-family: Georgia, 'Times New Roman', serif; }
+  .serif { font-family: ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.02em; }
+  html { color-scheme: light; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  .rise { animation: rise .45s ease both; }
+  .rise:nth-child(n+2) { animation-delay: .05s; } .rise:nth-child(n+4) { animation-delay: .1s; } .rise:nth-child(n+7) { animation-delay: .15s; }
   .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
   .att-btn { transition: transform 0.12s ease; cursor: pointer; }
   .att-btn:hover { transform: translateY(-1px); }
   .att-btn:active { transform: translateY(0); }
   ::-webkit-scrollbar { height: 6px; width: 6px; }
-  ::-webkit-scrollbar-thumb { background: #C9C0A8; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: #CDD3E6; border-radius: 3px; }
   a { color: inherit; }
-  button { font: inherit; }
+  button { font: inherit; color: inherit; }
 </style>
 </head>
 <body>
@@ -36,10 +40,10 @@ var EXAMS = {"mid": ["2026-11-30", "2026-12-06"], "end": ["2026-12-29", "2027-01
 var STUDENT = { name: "Anubhav Prasad", reg: "DBM/1007/03", program: "DBM Term V", threshold: 80 };
 
 var STATUS_META = {
-  present:   { label: "Present",   color: "#3F6B4C", glyph: iconCheck },
-  od:        { label: "On Duty",   color: "#B08B3D", glyph: iconFile },
-  absent:    { label: "Absent",    color: "#A33636", glyph: iconX },
-  cancelled: { label: "Cancelled", color: "#8A8372", glyph: iconBan }
+  present:   { label: "Present",   color: "#16A34A", glyph: iconCheck },
+  od:        { label: "On Duty",   color: "#D97706", glyph: iconFile },
+  absent:    { label: "Absent",    color: "#E11D48", glyph: iconX },
+  cancelled: { label: "Cancelled", color: "#6B7494", glyph: iconBan }
 };
 var STATUS_ORDER = ["present", "od", "absent", "cancelled"];
 
@@ -185,13 +189,13 @@ function renderSyncBadge() {
   var el = document.getElementById("syncBadge");
   if (!el) return;
   var map = {
-    idle:       { text: "\\u00b7", color: "#B7AD90" },
-    syncing:    { text: "Syncing\\u2026", color: "#8A8372" },
-    synced:     { text: "Synced", color: "#3F6B4C" },
-    error:      { text: "Sync failed \\u2013 saved on this device", color: "#A33636" },
-    offline:    { text: "Offline \\u2013 showing last saved copy", color: "#A33636" },
-    auth_error: { text: "Sync key rejected \\u2013 check Access Key permissions", color: "#A33636" },
-    not_found:  { text: "Bin not found \\u2013 check Bin ID", color: "#A33636" }
+    idle:       { text: "\\u00b7", color: "#9AA3C0" },
+    syncing:    { text: "Syncing\\u2026", color: "#6B7494" },
+    synced:     { text: "Synced", color: "#16A34A" },
+    error:      { text: "Sync failed \\u2013 saved on this device", color: "#E11D48" },
+    offline:    { text: "Offline \\u2013 showing last saved copy", color: "#E11D48" },
+    auth_error: { text: "Sync key rejected \\u2013 check Access Key permissions", color: "#E11D48" },
+    not_found:  { text: "Bin not found \\u2013 check Bin ID", color: "#E11D48" }
   };
   var m = map[syncStatus] || map.idle;
   el.textContent = m.text;
@@ -264,36 +268,65 @@ function groupByMonth(filterCourse) {
 /* ---------- render pieces ---------- */
 function sealHtml(pct, size) {
   size = size || 88;
-  if (pct === null) {
-    return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;border:2px dashed #B7AD90;' +
-      'display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#8A8372;' +
-      'font-family:inherit;font-size:11px;text-align:center;line-height:1.2;" class="mono">NO<br>DATA</div>';
+  var r = size / 2 - 5, C = 2 * Math.PI * r, p = pct === null ? 0 : Math.min(100, pct);
+  var col = pct === null ? "#9AA3C0" : pct >= STUDENT.threshold ? "#16A34A" : "#E11D48";
+  var th = STUDENT.threshold / 100 * 2 * Math.PI, c = size / 2;
+  return '<div style="position:relative;width:' + size + 'px;height:' + size + 'px;flex-shrink:0;">' +
+    '<svg width="' + size + '" height="' + size + '" style="transform:rotate(-90deg)">' +
+    '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="none" stroke="#E3E6F0" stroke-width="6"/>' +
+    '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - p / 100)) + '" style="filter:drop-shadow(0 0 5px ' + col + '99)"/>' +
+    '<circle cx="' + (c + Math.cos(th) * r) + '" cy="' + (c + Math.sin(th) * r) + '" r="2.5" fill="#1B2033"/></svg>' +
+    '<div class="mono" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:' + (size > 70 ? 20 : 15) + 'px;color:' + col + ';">' + (pct === null ? "\u2014" : Math.round(pct) + "%") + '</div></div>';
+}
+
+function greet() { var x = new Date().getHours(); return x < 12 ? "Good morning" : x < 17 ? "Good afternoon" : "Good evening"; }
+function rankLabel(p) { return p === null ? "Fresh term" : p >= 95 ? "Attendance legend" : p >= 90 ? "Front-row regular" : p >= STUDENT.threshold ? "Safe &amp; steady" : "Danger zone"; }
+var PALETTE = ["#8466FF", "#F472B6", "#38BDF8", "#FB923C", "#2DD4BF", "#818CF8", "#E879F9", "#60A5FA"];
+function courseColor(c) { return PALETTE[COURSES.indexOf(c) % PALETTE.length]; }
+
+function markBtns(s) {
+  var st = state.attendance[s.id], h = "";
+  STATUS_ORDER.forEach(function (opt) {
+    var m = STATUS_META[opt], on = st === opt;
+    h += '<button class="att-btn mark-btn" data-id="' + s.id + '" data-status="' + opt + '" title="' + m.label + '" style="flex:1;height:30px;border-radius:8px;border:1.5px solid ' + (on ? m.color : "#CDD3E6") + ';background:' + (on ? m.color : "transparent") + ';display:flex;align-items:center;justify-content:center;">' + m.glyph(14, on ? "#fff" : "#6B7494") + '</button>';
+  });
+  return h;
+}
+
+function todayHtml(today) {
+  var list = SESSIONS.filter(function (s) { return s.date === today; }), label = "Today";
+  if (!list.length) {
+    var nx = SESSIONS.filter(function (s) { return s.date > today; })[0];
+    if (!nx) return "";
+    list = SESSIONS.filter(function (s) { return s.date === nx.date; });
+    label = "No class today \u00b7 next up " + nx.day.slice(0, 3) + " " + fmtDate(nx.date);
   }
-  var color = pct >= STUDENT.threshold ? "#3F6B4C" : "#A33636";
-  var fs = size > 70 ? 22 : 16;
-  return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;border:3px solid ' + color +
-    ';display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;' +
-    'transform:rotate(-6deg);position:relative;color:' + color + ';box-shadow:inset 0 0 0 3px ' + color + '22;">' +
-    '<div style="position:absolute;inset:4px;border-radius:50%;border:1px solid ' + color + '55;"></div>' +
-    '<span class="mono" style="font-weight:700;font-size:' + fs + 'px;">' + Math.round(pct) + '%</span>' +
-    '<span class="mono" style="font-size:8px;letter-spacing:0.08em;margin-top:2px;">ATTEND</span></div>';
+  var live = list[0].date === today;
+  var h = '<div style="margin-bottom:18px;"><div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#6B7494;margin-bottom:8px;">' + label + ' \u00b7 ' + list.length + ' class' + (list.length > 1 ? "es" : "") + '</div><div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;">';
+  list.forEach(function (s) {
+    h += '<div class="rise" style="min-width:200px;flex:0 0 auto;background:#F8F9FD;border:1px solid #E3E6F0;border-top:3px solid ' + courseColor(s.subject) + ';border-radius:12px;padding:12px;">' +
+      '<div class="mono" style="font-size:11px;color:#6B7494;">' + s.slot + ' \u00b7 #' + s.n + '</div>' +
+      '<div style="font-size:13px;font-weight:600;margin:3px 0 10px;line-height:1.3;">' + esc(s.subject) + '</div>' +
+      (live ? '<div style="display:flex;gap:5px;">' + markBtns(s) + '</div>' : '<div style="font-size:11.5px;color:#6B7494;">' + esc(s.professor) + '</div>') + '</div>';
+  });
+  return h + '</div></div>';
 }
 
 function bunk(s) { return Math.floor((s.total - s.cancelled) * (100 - STUDENT.threshold) / 100 + 1e-9) - s.absent; }
 function bunkHtml(s) {
   var b = bunk(s), txt, col;
-  if (b < 0) { txt = "Can no longer reach " + STUDENT.threshold + "%"; col = "#A33636"; }
-  else { txt = b + " skip" + (b === 1 ? "" : "s") + " left at " + STUDENT.threshold + "%"; col = b === 0 ? "#B08B3D" : "#3F6B4C"; }
+  if (b < 0) { txt = "Can no longer reach " + STUDENT.threshold + "%"; col = "#E11D48"; }
+  else { txt = b + " skip" + (b === 1 ? "" : "s") + " left at " + STUDENT.threshold + "%"; col = b === 0 ? "#D97706" : "#16A34A"; }
   return '<div style="font-size:11.5px;color:' + col + ';margin-top:4px;">' + txt + '</div>';
 }
 
 function statsHtml(today, overall, cs) {
   function dd(iso) { return new Date(iso + "T00:00:00"); }
   function tile(label, big, sub, col) {
-    return '<div style="background:#FFFDF6;border:1px solid #E1D8BC;border-radius:12px;padding:14px 16px;">' +
-      '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A8372;">' + label + '</div>' +
-      '<div class="serif" style="font-size:26px;font-weight:700;margin:4px 0 2px;color:' + (col || "#26241E") + ';">' + big + '</div>' +
-      '<div style="font-size:12px;color:#8A8372;">' + sub + '</div></div>';
+    return '<div class="rise" style="background:#F8F9FD;border:1px solid #E3E6F0;border-radius:12px;padding:14px 16px;">' +
+      '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7494;">' + label + '</div>' +
+      '<div class="serif" style="font-size:26px;font-weight:700;margin:4px 0 2px;color:' + (col || "#1B2033") + ';">' + big + '</div>' +
+      '<div style="font-size:12px;color:#6B7494;">' + sub + '</div></div>';
   }
   function until(r) {
     var n = Math.round((dd(r[0]) - dd(today)) / 86400000);
@@ -316,20 +349,20 @@ function statsHtml(today, overall, cs) {
   SESSIONS.forEach(function (s) { perDay[s.date] = (perDay[s.date] || 0) + 1; });
   var md = Object.keys(perDay).sort(function (a, b) { return perDay[b] - perDay[a] || (a < b ? -1 : 1); })[0];
   var none = "Mark a few classes first";
-  var h = '<div style="background:#FFFDF6;border:1px solid #E1D8BC;border-radius:12px;padding:14px 16px;margin-bottom:12px;">' +
-    '<div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A8372;"><span>Term progress</span><span>' +
+  var h = '<div style="background:#F8F9FD;border:1px solid #E3E6F0;border-radius:12px;padding:14px 16px;margin-bottom:12px;">' +
+    '<div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7494;"><span>Term progress</span><span>' +
     elapsed + ' / ' + SESSIONS.length + ' classes gone by</span></div>' +
-    '<div style="height:10px;background:#EDE6D0;border-radius:5px;margin-top:8px;overflow:hidden;"><div style="height:100%;width:' +
-    Math.round(elapsed / SESSIONS.length * 100) + '%;background:#7A2E2E;"></div></div></div>';
+    '<div style="height:10px;background:#E9ECF5;border-radius:5px;margin-top:8px;overflow:hidden;"><div style="height:100%;width:' +
+    Math.round(elapsed / SESSIONS.length * 100) + '%;background:#7C5CFF;"></div></div></div>';
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:20px;">';
-  h += tile("Current streak", run, "classes in a row \u00b7 best " + longest, run >= 5 ? "#3F6B4C" : null);
+  h += tile("Current streak", run, "classes in a row \u00b7 best " + longest, run >= 5 ? "#16A34A" : null);
   h += tile("Hours in class", (attended * 1.5).toFixed(1) + "h", attended + " classes attended");
-  h += tile("Skip budget left", skips, "across all courses at " + STUDENT.threshold + "%", skips === 0 ? "#A33636" : null);
+  h += tile("Skip budget left", skips, "across all courses at " + STUDENT.threshold + "%", skips === 0 ? "#E11D48" : null);
   h += tile("Classes to go", left, (left * 1.5).toFixed(1) + " hours of lectures");
   h += tile("Marathon day", perDay[md] + " classes", fmtDate(md) + " \u00b7 " + new Date(md + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long" }));
-  h += tile("Perfect courses", perfect, "zero absences so far", perfect > 0 ? "#3F6B4C" : null);
-  h += tile("Star course", top ? Math.round(cs[top].pct) + "%" : "\u2014", top ? esc(top) : none, "#3F6B4C");
-  h += tile("Needs some love", low ? Math.round(cs[low].pct) + "%" : "\u2014", low ? esc(low) : none, low && cs[low].pct < STUDENT.threshold ? "#A33636" : null);
+  h += tile("Perfect courses", perfect, "zero absences so far", perfect > 0 ? "#16A34A" : null);
+  h += tile("Star course", top ? Math.round(cs[top].pct) + "%" : "\u2014", top ? esc(top) : none, "#16A34A");
+  h += tile("Needs some love", low ? Math.round(cs[low].pct) + "%" : "\u2014", low ? esc(low) : none, low && cs[low].pct < STUDENT.threshold ? "#E11D48" : null);
   h += tile("Mid sems in", until(EXAMS.mid), fmtDate(EXAMS.mid[0]) + " \u2013 " + fmtDate(EXAMS.mid[1]));
   h += tile("End sems in", until(EXAMS.end), fmtDate(EXAMS.end[0]) + " \u2013 " + fmtDate(EXAMS.end[1]));
   return h + '</div>';
@@ -343,52 +376,54 @@ function render() {
   var html = '';
 
   // masthead
-  html += '<div style="border-bottom:3px double #7A2E2E;padding:28px 20px 20px;background:linear-gradient(180deg,#F7F2E4 0%,#F2ECDD 100%);">';
+  html += '<div style="border-bottom:1px solid #E3E6F0;padding:28px 20px 22px;background:radial-gradient(120% 140% at 10% 0%,#EEEAFF 0%,#FFFFFF 70%);">';
   html += '<div style="max-width:880px;margin:0 auto;">';
-  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' + iconScroll(20, "#7A2E2E") +
-    '<span class="mono" style="font-size:11px;letter-spacing:0.15em;color:#7A2E2E;font-weight:600;">REGISTER No. ' + esc(STUDENT.reg) + '</span></div>';
-  html += '<h1 class="serif" style="font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;color:#26241E;letter-spacing:-0.01em;">Attendance Register</h1>';
-  html += '<p style="margin:6px 0 0;font-size:14px;color:#5B5644;">' + esc(STUDENT.name) + ' &nbsp;\u00b7&nbsp; ' + esc(STUDENT.program) +
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' + iconScroll(20, "#7C5CFF") +
+    '<span class="mono" style="font-size:11px;letter-spacing:0.15em;color:#7C5CFF;font-weight:600;">REGISTER No. ' + esc(STUDENT.reg) + '</span></div>';
+  html += '<h1 class="serif" style="font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;color:#1B2033;letter-spacing:-0.01em;">' + greet() + ', Anubhav</h1>';
+  html += '<p style="margin:6px 0 0;font-size:14px;color:#4B5471;">' + esc(STUDENT.name) + ' &nbsp;\u00b7&nbsp; ' + esc(STUDENT.program) +
     ' &nbsp;\u00b7&nbsp; ' + fmtDate(SESSIONS[0].date) + ' \u2013 ' + fmtDate(SESSIONS[SESSIONS.length - 1].date) + '</p>';
   html += '</div></div>';
 
   html += '<div style="max-width:880px;margin:0 auto;padding:0 20px;">';
 
   // overall summary bar
-  html += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFFDF6;border:1px solid #E1D8BC;border-radius:10px;padding:16px 20px;margin:20px 0;box-shadow:0 1px 2px rgba(0,0,0,0.03);">';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F8F9FD;border:1px solid #E3E6F0;border-radius:10px;padding:16px 20px;margin:20px 0;box-shadow:0 1px 2px rgba(0,0,0,0.03);">';
   html += sealHtml(overall.pct, 72);
   html += '<div style="flex:1;min-width:180px;">';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">';
-  html += '<span style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#8A8372;">Overall standing</span>';
+  html += '<span style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7494;">' + rankLabel(overall.pct) + '</span>';
   html += '<span style="display:flex;align-items:center;gap:8px;">' +
     '<span id="syncBadge" class="mono" style="font-size:10.5px;"></span>' +
-    '<button class="att-btn" id="refreshBtn" title="Pull latest from other devices" style="border:1px solid #D8CFB2;background:#FFFDF6;border-radius:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">' + iconReset(12, "#8A8372") + '</button></span>';
+    '<button class="att-btn" id="refreshBtn" title="Pull latest from other devices" style="border:1px solid #CDD3E6;background:#F8F9FD;border-radius:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">' + iconReset(12, "#6B7494") + '</button></span>';
   html += '</div>';
   html += '<div class="mono" style="font-size:14px;">' + overall.present + ' present \u00b7 ' + overall.od + ' OD \u00b7 ' + overall.absent +
     ' absent \u00b7 ' + overall.held + ' of ' + overall.total + ' classes held so far</div>';
   if (overall.unmarkedPast > 0) {
-    html += '<div style="font-size:12.5px;color:#A33636;margin-top:4px;">' + overall.unmarkedPast + ' past class' + (overall.unmarkedPast > 1 ? "es" : "") + ' still need marking</div>';
+    html += '<div style="font-size:12.5px;color:#E11D48;margin-top:4px;">' + overall.unmarkedPast + ' past class' + (overall.unmarkedPast > 1 ? "es" : "") + ' still need marking</div>';
   }
   html += '</div></div>';
+
+  html += todayHtml(today);
 
   // tabs
   html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">';
   [["overview", "Overview", iconCap], ["register", "Register", iconScroll], ["stats", "Fun Stats", iconStar]].forEach(function (t) {
     var active = state.view === t[0];
     html += '<button class="att-btn" data-view="' + t[0] + '" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;' +
-      'border:1px solid ' + (active ? "#7A2E2E" : "#D8CFB2") + ';background:' + (active ? "#7A2E2E" : "#FFFDF6") +
-      ';color:' + (active ? "#F7F2E4" : "#5B5644") + ';font-size:13.5px;font-weight:600;">' + t[2](15, active ? "#F7F2E4" : "#5B5644") + ' ' + t[1] + '</button>';
+      'border:1px solid ' + (active ? "#7C5CFF" : "#CDD3E6") + ';background:' + (active ? "#7C5CFF" : "#F8F9FD") +
+      ';color:' + (active ? "#FFFFFF" : "#4B5471") + ';font-size:13.5px;font-weight:600;">' + t[2](15, active ? "#FFFFFF" : "#4B5471") + ' ' + t[1] + '</button>';
   });
   html += '<button class="att-btn" id="resetBtn" style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;' +
-    'border:1px solid #D8CFB2;background:#FFFDF6;color:#8A8372;font-size:13px;">' + iconReset(14, "#8A8372") + ' Reset</button>';
+    'border:1px solid #CDD3E6;background:#F8F9FD;color:#6B7494;font-size:13px;">' + iconReset(14, "#6B7494") + ' Reset</button>';
   html += '</div>';
 
   if (state.showResetConfirm) {
-    html += '<div style="background:#FBEFE9;border:1px solid #E3B8AC;border-radius:8px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">';
-    html += '<span style="font-size:13.5px;color:#7A2E2E;">Clear every marked attendance record? This can\'t be undone.</span>';
+    html += '<div style="background:#FFF1F2;border:1px solid #FDA4AF;border-radius:8px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">';
+    html += '<span style="font-size:13.5px;color:#7C5CFF;">Clear every marked attendance record? This can\'t be undone.</span>';
     html += '<div style="display:flex;gap:8px;">';
-    html += '<button class="att-btn" id="confirmResetBtn" style="padding:6px 14px;border-radius:6px;border:none;background:#A33636;color:#fff;font-size:13px;font-weight:600;">Yes, clear all</button>';
-    html += '<button class="att-btn" id="cancelResetBtn" style="padding:6px 14px;border-radius:6px;border:1px solid #D8CFB2;background:#FFFDF6;font-size:13px;">Cancel</button>';
+    html += '<button class="att-btn" id="confirmResetBtn" style="padding:6px 14px;border-radius:6px;border:none;background:#E11D48;color:#fff;font-size:13px;font-weight:600;">Yes, clear all</button>';
+    html += '<button class="att-btn" id="cancelResetBtn" style="padding:6px 14px;border-radius:6px;border:1px solid #CDD3E6;background:#F8F9FD;font-size:13px;">Cancel</button>';
     html += '</div></div>';
   }
 
@@ -396,15 +431,15 @@ function render() {
     html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:20px;">';
     COURSES.forEach(function (c) {
       var s = courseStats[c];
-      html += '<div style="background:#FFFDF6;border:1px solid #E1D8BC;border-radius:12px;padding:16px;display:flex;gap:14px;align-items:flex-start;">';
+      html += '<div class="rise" style="background:#F8F9FD;border:1px solid #E3E6F0;border-left:4px solid ' + courseColor(c) + ';border-radius:12px;padding:16px;display:flex;gap:14px;align-items:flex-start;">';
       html += sealHtml(s.pct, 64);
       html += '<div style="flex:1;min-width:0;">';
       html += '<div class="serif" style="font-weight:600;font-size:15px;line-height:1.3;margin-bottom:3px;">' + esc(c) + '</div>';
-      html += '<div style="font-size:12px;color:#8A8372;margin-bottom:8px;">' + esc(PROF_BY_COURSE[c]) + '</div>';
-      html += '<div class="mono" style="font-size:12px;color:#5B5644;">' + s.present + 'P' + (s.od ? ' \u00b7 ' + s.od + 'OD' : '') +
+      html += '<div style="font-size:12px;color:#6B7494;margin-bottom:8px;">' + esc(PROF_BY_COURSE[c]) + '</div>';
+      html += '<div class="mono" style="font-size:12px;color:#4B5471;">' + s.present + 'P' + (s.od ? ' \u00b7 ' + s.od + 'OD' : '') +
         ' \u00b7 ' + s.absent + 'A' + (s.cancelled ? ' \u00b7 ' + s.cancelled + 'C' : '') + ' &nbsp;/&nbsp; ' + s.total + ' total</div>';
       html += bunkHtml(s);
-      if (s.unmarkedPast > 0) html += '<div style="font-size:11.5px;color:#A33636;margin-top:4px;">' + s.unmarkedPast + ' unmarked</div>';
+      if (s.unmarkedPast > 0) html += '<div style="font-size:11.5px;color:#E11D48;margin-top:4px;">' + s.unmarkedPast + ' unmarked</div>';
       html += '</div></div>';
     });
     html += '</div>';
@@ -413,12 +448,12 @@ function render() {
   if (state.view === "register") {
     html += '<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;">';
     var allActive = state.courseFilter === "all";
-    html += '<button class="att-btn course-chip" data-course="all" style="padding:6px 13px;border-radius:20px;border:1px solid ' + (allActive ? "#7A2E2E" : "#D8CFB2") +
-      ';background:' + (allActive ? "#7A2E2E" : "#FFFDF6") + ';color:' + (allActive ? "#F7F2E4" : "#5B5644") + ';font-size:12.5px;white-space:nowrap;font-weight:600;">All courses</button>';
+    html += '<button class="att-btn course-chip" data-course="all" style="padding:6px 13px;border-radius:20px;border:1px solid ' + (allActive ? "#7C5CFF" : "#CDD3E6") +
+      ';background:' + (allActive ? "#7C5CFF" : "#F8F9FD") + ';color:' + (allActive ? "#FFFFFF" : "#4B5471") + ';font-size:12.5px;white-space:nowrap;font-weight:600;">All courses</button>';
     COURSES.forEach(function (c) {
       var active = state.courseFilter === c;
-      html += '<button class="att-btn course-chip" data-course="' + esc(c) + '" style="padding:6px 13px;border-radius:20px;border:1px solid ' + (active ? "#7A2E2E" : "#D8CFB2") +
-        ';background:' + (active ? "#7A2E2E" : "#FFFDF6") + ';color:' + (active ? "#F7F2E4" : "#5B5644") + ';font-size:12.5px;white-space:nowrap;font-weight:600;">' + esc(c) + '</button>';
+      html += '<button class="att-btn course-chip" data-course="' + esc(c) + '" style="padding:6px 13px;border-radius:20px;border:1px solid ' + (active ? "#7C5CFF" : "#CDD3E6") +
+        ';background:' + (active ? "#7C5CFF" : "#F8F9FD") + ';color:' + (active ? "#FFFFFF" : "#4B5471") + ';font-size:12.5px;white-space:nowrap;font-weight:600;">' + esc(c) + '</button>';
     });
     html += '</div>';
 
@@ -426,29 +461,29 @@ function render() {
     groups.forEach(function (g) {
       var monthKey = g[0], sess = g[1];
       var isOpen = !!state.openMonths[monthKey];
-      html += '<div style="margin-bottom:12px;border:1px solid #E1D8BC;border-radius:10px;background:#FFFDF6;overflow:hidden;">';
+      html += '<div style="margin-bottom:12px;border:1px solid #E3E6F0;border-radius:10px;background:#F8F9FD;overflow:hidden;">';
       html += '<button class="att-btn month-toggle" data-month="' + monthKey + '" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:transparent;border:none;text-align:left;">';
       html += '<span class="serif" style="font-weight:600;font-size:15px;">' + fmtMonthYear(sess[0].date) + '</span>';
-      html += '<span style="display:flex;align-items:center;gap:8px;color:#8A8372;font-size:12px;">' + sess.length + ' session' + (sess.length > 1 ? "s" : "") + ' ' +
-        (isOpen ? iconChevUp(16, "#8A8372") : iconChevDown(16, "#8A8372")) + '</span>';
+      html += '<span style="display:flex;align-items:center;gap:8px;color:#6B7494;font-size:12px;">' + sess.length + ' session' + (sess.length > 1 ? "s" : "") + ' ' +
+        (isOpen ? iconChevUp(16, "#6B7494") : iconChevDown(16, "#6B7494")) + '</span>';
       html += '</button>';
       if (isOpen) {
-        html += '<div style="border-top:1px solid #EDE6D0;">';
+        html += '<div style="border-top:1px solid #E9ECF5;">';
         sess.forEach(function (s) {
           var st = state.attendance[s.id];
           var isToday = s.date === today;
-          html += '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #F1EBD8;background:' + (isToday ? "#FBF3DF" : "transparent") + ';">';
+          html += '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #F0F2F8;background:' + (isToday ? "#EEF2FF" : "transparent") + ';">';
           html += '<div style="width:92px;flex-shrink:0;"><div class="mono" style="font-size:12.5px;font-weight:600;">' + fmtDate(s.date) + '</div>' +
-            '<div style="font-size:10.5px;color:#8A8372;">' + s.day.slice(0, 3) + ' \u00b7 ' + s.slot + '</div></div>';
-          html += '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(s.subject) + ' <span class="mono" style="font-size:11px;color:#8A8372;">#' + s.n + '</span></div>' +
-            '<div style="font-size:11.5px;color:#8A8372;">' + esc(s.professor) + '</div></div>';
+            '<div style="font-size:10.5px;color:#6B7494;">' + s.day.slice(0, 3) + ' \u00b7 ' + s.slot + '</div></div>';
+          html += '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:' + courseColor(s.subject) + ';"></span>' + esc(s.subject) + ' <span class="mono" style="font-size:11px;color:#6B7494;">#' + s.n + '</span></div>' +
+            '<div style="font-size:11.5px;color:#6B7494;">' + esc(s.professor) + '</div></div>';
           html += '<div style="display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:132px;">';
           STATUS_ORDER.forEach(function (opt) {
             var meta = STATUS_META[opt];
             var active = st === opt;
             html += '<button class="att-btn mark-btn" data-id="' + s.id + '" data-status="' + opt + '" title="' + meta.label + '" style="width:28px;height:28px;border-radius:7px;' +
-              'border:1.5px solid ' + (active ? meta.color : "#D8CFB2") + ';background:' + (active ? meta.color : "#FFFDF6") +
-              ';display:flex;align-items:center;justify-content:center;">' + meta.glyph(13, active ? "#fff" : "#8A8372") + '</button>';
+              'border:1.5px solid ' + (active ? meta.color : "#CDD3E6") + ';background:' + (active ? meta.color : "#F8F9FD") +
+              ';display:flex;align-items:center;justify-content:center;">' + meta.glyph(13, active ? "#fff" : "#6B7494") + '</button>';
           });
           html += '</div></div>';
         });
@@ -461,13 +496,13 @@ function render() {
   if (state.view === "stats") html += statsHtml(today, overall, courseStats);
 
   // legend + footer
-  html += '<div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:24px;font-size:11.5px;color:#8A8372;">';
+  html += '<div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:24px;font-size:11.5px;color:#6B7494;">';
   STATUS_ORDER.forEach(function (opt) {
     var meta = STATUS_META[opt];
     html += '<span style="display:flex;align-items:center;gap:5px;">' + meta.glyph(12, meta.color) + ' ' + meta.label + '</span>';
   });
   html += '</div>';
-  html += '<div class="mono" style="text-align:center;font-size:11.5px;color:#B7AD90;margin-top:10px;">' +
+  html += '<div class="mono" style="text-align:center;font-size:11.5px;color:#9AA3C0;margin-top:10px;">' +
     STUDENT.threshold + '% minimum attendance \u00b7 On Duty counts as present \u00b7 marks saved automatically on this device</div>';
 
   html += '</div>'; // max-width wrapper
